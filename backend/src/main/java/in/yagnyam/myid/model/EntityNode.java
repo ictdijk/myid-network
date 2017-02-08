@@ -101,7 +101,8 @@ public class EntityNode {
 
 
     private static String urlDecode(String value) {
-        return value == null ? null : URLDecoder.decode(value);
+        // return value == null ? null : URLDecoder.decode(value);
+        return value;
     }
 
     public boolean verifySignature(PublicKey verificationKey) throws GeneralSecurityException, IOException {
