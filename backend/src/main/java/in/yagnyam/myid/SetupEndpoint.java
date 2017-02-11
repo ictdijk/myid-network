@@ -23,9 +23,6 @@ import in.yagnyam.myid.utils.SignUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * An endpoint class we are exposing
- */
 @Api(
         name = "setupApi",
         version = "v1",
@@ -50,20 +47,20 @@ public class SetupEndpoint {
         RootNode nlNode = rootNode("NL", genesisNode);
         RootNode inNode = rootNode("IN", genesisNode);
         // User nodes under NL
-        EntityNode annekeNode = personNode("Anneke", "112682765", nlNode);
-        EntityNode bobNode = personNode("Bob", "212682776", nlNode);
+        //EntityNode annekeNode = personNode("Anneke", "112682765", nlNode);
+        //EntityNode bobNode = personNode("Bob", "212682776", nlNode);
         // User nodes under IN
-        EntityNode chennaNode = personNode("Chenna", "322682765", inNode);
-        EntityNode dunnaNode = personNode("Dunna", "432682776", inNode);
+        //EntityNode chennaNode = personNode("Chenna", "322682765", inNode);
+        //EntityNode dunnaNode = personNode("Dunna", "432682776", inNode);
         // College nodes under NL
-        EntityNode collegeNode = collegeNode("AMU", nlNode);
+        EntityNode universityNode = universityNode("AMU", nlNode);
         // Degree Certification Node
-
-        return Arrays.asList(genesisNode, nlNode, inNode, annekeNode, bobNode, chennaNode, dunnaNode);
+        EntityNode policeNode = policeNode("Cop", nlNode);
+        return Arrays.asList(genesisNode, nlNode, inNode, universityNode, policeNode);
     }
 
     @SneakyThrows
-    GenesisNode genesisNode() {
+    private GenesisNode genesisNode() {
         GenesisNode genesisNode = new GenesisNode();
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(1024);
@@ -82,7 +79,7 @@ public class SetupEndpoint {
     }
 
     @SneakyThrows
-    RootNode rootNode(String name, GenesisNode signer) {
+    private RootNode rootNode(String name, GenesisNode signer) {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(1024);
         KeyPair keyPair = generator.generateKeyPair();
@@ -100,7 +97,7 @@ public class SetupEndpoint {
     }
 
     @SneakyThrows
-    EntityNode personNode(String name, String bsn, RootNode signer) {
+    private EntityNode personNode(String name, String bsn, RootNode signer) {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(1024);
         KeyPair keyPair = generator.generateKeyPair();
@@ -119,18 +116,36 @@ public class SetupEndpoint {
         return NodeEndpoint.newNode(personNode);
     }
 
-
     @SneakyThrows
-    EntityNode collegeNode(String name, RootNode signer) {
+    private EntityNode policeNode(String name, RootNode signer) {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(1024);
         KeyPair keyPair = generator.generateKeyPair();
         EntityNode collegeNode = new EntityNode();
-        collegeNode.setPath("/college/" + name.toLowerCase());
+        collegeNode.setPath("/police/" + name.toLowerCase());
         collegeNode.setKeyPair(keyPair);
         collegeNode.setPrivateKey(PemUtils.encodePrivateKey(keyPair.getPrivate()));
         collegeNode.setVerificationKey(PemUtils.encodePublicKey(keyPair.getPublic()));
-        collegeNode.setDescription("Node for College " + name + ".");
+        collegeNode.setDescription("Node for Police " + name + ".");
+        // Add signature by Root Node
+        collegeNode.setSigner(signer.getPath());
+        collegeNode.setSignatureSha256(SignUtils.getSignature(collegeNode.contentToSign(), SignUtils.ALGORITHM_SHA256WithRSA, signer.getKeyPair().getPrivate()));
+        collegeNode.setSignatureMd5(SignUtils.getSignature(collegeNode.contentToSign(), SignUtils.ALGORITHM_MD5WithRSA, signer.getKeyPair().getPrivate()));
+        return NodeEndpoint.newNode(collegeNode);
+    }
+
+
+    @SneakyThrows
+    private EntityNode universityNode(String name, RootNode signer) {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(1024);
+        KeyPair keyPair = generator.generateKeyPair();
+        EntityNode collegeNode = new EntityNode();
+        collegeNode.setPath("/university/" + name.toLowerCase());
+        collegeNode.setKeyPair(keyPair);
+        collegeNode.setPrivateKey(PemUtils.encodePrivateKey(keyPair.getPrivate()));
+        collegeNode.setVerificationKey(PemUtils.encodePublicKey(keyPair.getPublic()));
+        collegeNode.setDescription("Node for University " + name + ".");
         // Add signature by Root Node
         collegeNode.setSigner(signer.getPath());
         collegeNode.setSignatureSha256(SignUtils.getSignature(collegeNode.contentToSign(), SignUtils.ALGORITHM_SHA256WithRSA, signer.getKeyPair().getPrivate()));
